@@ -1,0 +1,10 @@
+".\Objects\DelayMs.obj",
+".\Objects\KeyScan.obj",
+".\Objects\LCD1602.obj",
+".\Objects\main.obj",
+".\Objects\MatrixKey.obj",
+".\Objects\Timer.obj",
+".\Objects\Buzzer.obj" 
+TO ".\Objects\计时器1" 
+
+PRINT(".\Listings\计时器1.map") removeunused 
