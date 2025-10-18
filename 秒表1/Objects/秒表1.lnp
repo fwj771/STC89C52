@@ -1,0 +1,5 @@
+".\Objects\LCD1602.obj",
+".\Objects\main.obj" 
+TO ".\Objects\√Î±Ì1" 
+
+PRINT(".\Listings\√Î±Ì1.map") REMOVEUNUSED 
