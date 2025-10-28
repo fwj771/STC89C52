@@ -1,0 +1,10 @@
+".\Objects\main.obj",
+".\Objects\DelayMs.obj",
+".\Objects\DigitalTube.obj",
+".\Objects\KeyScan.obj",
+".\Objects\LCD1602.obj",
+".\Objects\MatrixKey.obj",
+".\Objects\Timer.obj" 
+TO ".\Objects\ÃÜÂëËø1" 
+
+PRINT(".\Listings\ÃÜÂëËø1.map") removeunused 
