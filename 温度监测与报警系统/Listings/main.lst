@@ -1,0 +1,95 @@
+C51 COMPILER V9.54   MAIN                                                                  11/07/2025 20:44:38 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil\Keil5 C51\C51\BIN\C51.EXE main.c OMF2 OPTIMIZE(8,SPEED) BROWSE DEBUG PRINT(.\Listings\main.
+                    -lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "Delay.h"
+   3          #include "LCD1602.h"
+   4          #include "DS18B20.h"
+   5          #include "Buzzer.h"
+   6          #include "KeyScan.h"
+   7          
+   8          signed char TH, TL;            // 报警阈值变量（由 DS18B20_LoadAlarm() 恢复）
+   9          unsigned int convertTimer = 0; // 转换计时器
+  10          float temperature;             // 当前温度
+  11          
+  12          void main(void) {
+  13   1          Buzzer_Init();
+  14   1          LCD_Init();
+  15   1          
+  16   1          // 界面布局
+  17   1          LCD_ShowString(1, 1, "T:");      // 温度显示区
+  18   1          LCD_ShowString(1, 9, "TH");     // 高温报警上限
+  19   1          LCD_ShowString(1, 13, "TL");    // 低温报警下限
+  20   1          
+  21   1          DS18B20_LoadAlarm();     // 掉电恢复报警值
+  22   1          DS18B20_StartConvert();  // 开始首次转换
+  23   1      
+  24   1          // 初次显示 TH / TL
+  25   1          LCD_ShowNum(1, 11, TH, 2);
+  26   1          LCD_ShowNum(1, 15, TL, 2);
+  27   1      
+  28   1          while(1)
+  29   1          {
+  30   2              KeyScan();  // 按键实时响应（内部修改 TH、TL，并调用 DS18B20_SetAlarm）
+  31   2      
+  32   2              convertTimer++;
+  33   2              DelayMs(1); // 主循环周期约 1ms
+  34   2              
+  35   2              // 每 750ms 读取一次温度
+  36   2              if(convertTimer >= 750)
+  37   2              {
+  38   3                  convertTimer = 0;
+  39   3      
+  40   3                  temperature = DS18B20_ReadTemp(); // 获取温度
+  41   3                  DS18B20_StartConvert();           // 开始下一次转换
+  42   3      
+  43   3                  // 温度显示（格式：T: 25.3）
+  44   3                  LCD_ShowNum(1,3,(int)temperature,2);            // 整数部分
+  45   3                  LCD_ShowChar(1,5,'.');
+  46   3                  LCD_ShowNum(1,6,(int)((temperature-(int)temperature)*10),1); // 小数1位
+  47   3      
+  48   3                  // 显示当前报警上下限（防止按键修改后界面不更新）
+  49   3                  LCD_ShowNum(1, 11, TH, 2);
+  50   3                  LCD_ShowNum(1, 15, TL, 2);
+  51   3      
+  52   3                  // 报警判断
+  53   3                  if(DS18B20_AlarmCheck(temperature))
+  54   3                  {
+C51 COMPILER V9.54   MAIN                                                                  11/07/2025 20:44:38 PAGE 2   
+
+  55   4                      LCD_ShowString(2, 1, "!!! ALARM !!!  "); 
+  56   4                      MusicPlay(); // 蜂鸣器响
+  57   4                      
+  58   4                  }
+  59   3                  else
+  60   3                  {
+  61   4                      LCD_ShowString(2, 1, "NORMAL         "); 
+  62   4                  }
+  63   3              }
+  64   2          }
+  65   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    314    ----
+   CONSTANT SIZE    =     41    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

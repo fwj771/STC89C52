@@ -1,0 +1,10 @@
+".\Objects\main.obj",
+".\Objects\LCD1602.obj",
+".\Objects\Buzzer.obj",
+".\Objects\Delay.obj",
+".\Objects\DS18B20.obj",
+".\Objects\KeyScan.obj",
+".\Objects\OneWire.obj" 
+TO ".\Objects\ÎÂÊª¶È¼ì²âÕ¾" 
+
+PRINT(".\Listings\ÎÂÊª¶È¼ì²âÕ¾.map") REMOVEUNUSED 

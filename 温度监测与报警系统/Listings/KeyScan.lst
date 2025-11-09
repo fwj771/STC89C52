@@ -1,0 +1,116 @@
+C51 COMPILER V9.54   KEYSCAN                                                               11/07/2025 20:50:21 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE KEYSCAN
+OBJECT MODULE PLACED IN .\Objects\KeyScan.obj
+COMPILER INVOKED BY: D:\Keil\Keil5 C51\C51\BIN\C51.EXE KeyScan.c OMF2 OPTIMIZE(8,SPEED) BROWSE DEBUG PRINT(.\Listings\Ke
+                    -yScan.lst) TABS(2) OBJECT(.\Objects\KeyScan.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "Delay.h"
+   3          #include "LCD1602.h"
+   4          #include "DS18B20.h"
+   5          
+   6          extern signed char TH, TL;    // 全局报警阈值变量
+   7          
+   8          sbit KEY_THADD = P3^1;        // 高温上限 + 按键
+   9          sbit KEY_THSUB = P3^0;        // 高温上限 - 按键
+  10          sbit KEY_TLADD = P3^2;        // 低温下限 + 按键
+  11          sbit KEY_TLSUB = P3^3;        // 低温下限 - 按键
+  12          
+  13          /**
+  14            * @brief  按键扫描（单击调节 TH / TL）
+  15            * @note   内部自动消抖 + 自动更新 EEPROM + LCD 显示同步
+  16            */
+  17          void KeyScan(void)
+  18          {
+  19   1          static bit lock_THadd = 0;
+  20   1          static bit lock_THsub = 0;
+  21   1          static bit lock_TLadd = 0;
+  22   1          static bit lock_TLsub = 0;
+  23   1      
+  24   1          // ---------- 高温上限 TH++ ----------
+  25   1          if(KEY_THADD == 0 && !lock_THadd)
+  26   1          {
+  27   2              DelayMs(20);
+  28   2              if(KEY_THADD == 0)
+  29   2              {
+  30   3                  lock_THadd = 1;
+  31   3      
+  32   3                  if(TH < 99) TH++;          // 防止超范围
+  33   3                  DS18B20_SetAlarm(TH, TL);  // 写入 EEPROM
+  34   3                  LCD_ShowNum(1, 11, TH, 2); // 刷新显示
+  35   3              }
+  36   2          }
+  37   1          else if(KEY_THADD == 1) lock_THadd = 0;
+  38   1      
+  39   1      
+  40   1          // ---------- 高温上限 TH-- ----------
+  41   1          if(KEY_THSUB == 0 && !lock_THsub)
+  42   1          {
+  43   2              DelayMs(20);
+  44   2              if(KEY_THSUB == 0)
+  45   2              {
+  46   3                  lock_THsub = 1;
+  47   3      
+  48   3                  if(TH > -55) TH--;        // DS18B20 下限为 -55℃
+  49   3                  DS18B20_SetAlarm(TH, TL);
+  50   3                  LCD_ShowNum(1, 11, TH, 2);
+  51   3              }
+  52   2          }
+  53   1          else if(KEY_THSUB == 1) lock_THsub = 0;
+  54   1      
+C51 COMPILER V9.54   KEYSCAN                                                               11/07/2025 20:50:21 PAGE 2   
+
+  55   1      
+  56   1          // ---------- 低温下限 TL++ ----------
+  57   1          if(KEY_TLADD == 0 && !lock_TLadd)
+  58   1          {
+  59   2              DelayMs(20);
+  60   2              if(KEY_TLADD == 0)
+  61   2              {
+  62   3                  lock_TLadd = 1;
+  63   3      
+  64   3                  if(TL < 98) TL++;         // TL 要小于 TH，留 1°C 余量可选
+  65   3                  DS18B20_SetAlarm(TH, TL);
+  66   3                  LCD_ShowNum(1, 15, TL, 2);
+  67   3              }
+  68   2          }
+  69   1          else if(KEY_TLADD == 1) lock_TLadd = 0;
+  70   1      
+  71   1      
+  72   1          // ---------- 低温下限 TL-- ----------
+  73   1          if(KEY_TLSUB == 0 && !lock_TLsub)
+  74   1          {
+  75   2              DelayMs(20);
+  76   2              if(KEY_TLSUB == 0)
+  77   2              {
+  78   3                  lock_TLsub = 1;
+  79   3      
+  80   3                  if(TL > -55) TL--;
+  81   3                  DS18B20_SetAlarm(TH, TL);
+  82   3                  LCD_ShowNum(1, 15, TL, 2);
+  83   3              }
+  84   2          }
+  85   1          else if(KEY_TLSUB == 1) lock_TLsub = 0;
+  86   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    239    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      4    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

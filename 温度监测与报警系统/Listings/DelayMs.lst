@@ -1,0 +1,36 @@
+C51 COMPILER V9.54   DELAYMS                                                               11/06/2025 14:58:56 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE DELAYMS
+OBJECT MODULE PLACED IN .\Objects\DelayMs.obj
+COMPILER INVOKED BY: D:\Keil\Keil5 C51\C51\BIN\C51.EXE DelayMs.c OMF2 OPTIMIZE(8,SPEED) BROWSE DEBUG PRINT(.\Listings\De
+                    -layMs.lst) TABS(2) OBJECT(.\Objects\DelayMs.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          
+   3          void DelayMs(unsigned int ms) 
+   4          {
+   5   1          unsigned int i, j;
+   6   1          for(i = 0; i < ms; i++)
+   7   1              for(j = 0; j < 120; j++);  // 12MHz下的经验值
+   8   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     32    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

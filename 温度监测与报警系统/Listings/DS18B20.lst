@@ -1,0 +1,117 @@
+C51 COMPILER V9.54   DS18B20                                                               11/07/2025 20:35:32 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE DS18B20
+OBJECT MODULE PLACED IN .\Objects\DS18B20.obj
+COMPILER INVOKED BY: D:\Keil\Keil5 C51\C51\BIN\C51.EXE DS18B20.c OMF2 OPTIMIZE(8,SPEED) BROWSE DEBUG PRINT(.\Listings\DS
+                    -18B20.lst) TABS(2) OBJECT(.\Objects\DS18B20.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "OneWire.h"
+   3          #include "Delay.h"
+   4          
+   5          extern signed char TH, TL ;  
+   6          
+   7          /**
+   8            * @brief 启动温度转换（非阻塞）
+   9            */
+  10          void DS18B20_StartConvert(void)
+  11          {
+  12   1          OneWireInit();
+  13   1          OneWireWriteByte(0xCC);     // Skip ROM
+  14   1          OneWireWriteByte(0x44);     // Convert T
+  15   1      }
+  16          
+  17          /**
+  18            * @brief 读取温度寄存器，返回摄氏温度
+  19            */
+  20          float DS18B20_ReadTemp(void)
+  21          {
+  22   1          unsigned char LSB, MSB;
+  23   1          int tempValue;
+  24   1          float temperature;
+  25   1      
+  26   1          OneWireInit();
+  27   1          OneWireWriteByte(0xCC);     // Skip ROM
+  28   1          OneWireWriteByte(0xBE);     // Read Scratchpad
+  29   1      
+  30   1          LSB = OneWireReadByte();
+  31   1          MSB = OneWireReadByte();
+  32   1      
+  33   1          tempValue = (MSB << 8) | LSB;
+  34   1          temperature = tempValue / 16.0;
+  35   1      
+  36   1          return temperature;
+  37   1      }
+  38          
+  39          /**
+  40            * @brief 从 EEPROM 载入报警阈值（掉电记忆）
+  41            */
+  42          void DS18B20_LoadAlarm(void)
+  43          {
+  44   1          unsigned char discard;
+  45   1      
+  46   1          OneWireInit();
+  47   1          OneWireWriteByte(0xCC);
+  48   1          OneWireWriteByte(0xB8);     // Recall E2 → 将 EEPROM 加载到 Scratchpad
+  49   1      
+  50   1          OneWireInit();
+  51   1          OneWireWriteByte(0xCC);
+  52   1          OneWireWriteByte(0xBE);     // Read Scratchpad
+  53   1      
+  54   1          discard = OneWireReadByte();   // byte0 温度 LSB（丢弃）
+C51 COMPILER V9.54   DS18B20                                                               11/07/2025 20:35:32 PAGE 2   
+
+  55   1          discard = OneWireReadByte();   // byte1 温度 MSB（丢弃）
+  56   1          TH = OneWireReadByte();        // byte2 高温报警上限
+  57   1          TL = OneWireReadByte();        // byte3 低温报警下限
+  58   1      }
+  59          
+  60          /**
+  61            * @brief 设置报警阈值，并写入 EEPROM（掉电不丢失）
+  62            */
+  63          void DS18B20_SetAlarm(signed char th, signed char tl)
+  64          {
+  65   1          TH = th;
+  66   1          TL = tl;
+  67   1      
+  68   1          OneWireInit();
+  69   1          OneWireWriteByte(0xCC);
+  70   1          OneWireWriteByte(0x4E);     // Write Scratchpad
+  71   1          OneWireWriteByte(TH);       // 写入高温报警上限
+  72   1          OneWireWriteByte(TL);       // 写入低温报警下限
+  73   1          OneWireWriteByte(0x7F);     // 配置分辨率=12位
+  74   1      
+  75   1          OneWireInit();
+  76   1          OneWireWriteByte(0xCC);
+  77   1          OneWireWriteByte(0x48);     // Copy Scratchpad → 保存入 EEPROM
+  78   1      }
+  79          
+  80          /**
+  81            * @brief 报警判定
+  82            * @return 1=报警, 0=正常
+  83            */
+  84          bit DS18B20_AlarmCheck(float temperature)
+  85          {
+  86   1          return (temperature >= TH || temperature <= TL);
+  87   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    202    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

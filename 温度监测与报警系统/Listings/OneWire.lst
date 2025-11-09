@@ -1,0 +1,123 @@
+C51 COMPILER V9.54   ONEWIRE                                                               11/07/2025 20:47:03 PAGE 1   
+
+
+C51 COMPILER V9.54, COMPILATION OF MODULE ONEWIRE
+OBJECT MODULE PLACED IN .\Objects\OneWire.obj
+COMPILER INVOKED BY: D:\Keil\Keil5 C51\C51\BIN\C51.EXE OneWire.c OMF2 OPTIMIZE(8,SPEED) BROWSE DEBUG PRINT(.\Listings\On
+                    -eWire.lst) TABS(2) OBJECT(.\Objects\OneWire.obj)
+
+line level    source
+
+   1          #include <REGX52.H>
+   2          #include "OneWire.h"
+   3          
+   4          sbit OneWire_DQ = P3^7;    // DS18B20 数据线
+   5          
+   6          /**
+   7            * @brief  OneWire 初始化与复位
+   8            * @retval 0=DS18B20 存在，1=无器件响应
+   9            */
+  10          unsigned char OneWireInit(void)
+  11          {
+  12   1          unsigned char i;
+  13   1          unsigned char presence;
+  14   1      
+  15   1          OneWire_DQ = 1;               // 释放总线
+  16   1          OneWire_DQ = 0;               // 拉低复位
+  17   1          i = 247; while (--i);         // 延时 ≈ 500us
+  18   1      
+  19   1          OneWire_DQ = 1;               // 释放总线，等待从机回应
+  20   1          i = 32; while (--i);          // 延时 ≈ 70us
+  21   1      
+  22   1          presence = OneWire_DQ;        // 读取存在脉冲（0=存在，1=无）
+  23   1      
+  24   1          i = 247; while (--i);         // 延时 ≈ 500us（恢复总线）
+  25   1      
+  26   1          return presence;
+  27   1      }
+  28          
+  29          /**
+  30            * @brief  写 1 位数据
+  31            * @param  BitValue: 0 or 1
+  32            */
+  33          void OneWireWriteBit(unsigned char BitValue)
+  34          {
+  35   1          unsigned char i;
+  36   1      
+  37   1          OneWire_DQ = 0;               // 起始信号
+  38   1          i = 4; while (--i);           // 保持低电平 ≈ 10us
+  39   1      
+  40   1          OneWire_DQ = BitValue;        // 写数据位
+  41   1          i = 29; while (--i);          // 保持 ≈ 60us
+  42   1      
+  43   1          OneWire_DQ = 1;               // 释放总线
+  44   1      }
+  45          
+  46          /**
+  47            * @brief  读 1 位数据
+  48            * @retval 0 or 1
+  49            */
+  50          unsigned char OneWireReadBit(void)
+  51          {
+  52   1          unsigned char i;
+  53   1          unsigned char BitValue;
+  54   1      
+C51 COMPILER V9.54   ONEWIRE                                                               11/07/2025 20:47:03 PAGE 2   
+
+  55   1          OneWire_DQ = 0;
+  56   1          i = 2; while (--i);           // 起始低电平 ≈ 5us
+  57   1      
+  58   1          OneWire_DQ = 1;               // 释放总线准备读
+  59   1          i = 2; while (--i);           // 等待从机输出 ≈ 5us
+  60   1      
+  61   1          BitValue = OneWire_DQ;        // 采样数据位
+  62   1          i = 24; while (--i);          // 时隙结束 ≈ 50us
+  63   1      
+  64   1          return BitValue;
+  65   1      }
+  66          
+  67          /**
+  68            * @brief  写 1 字节数据（低位先传）
+  69            */
+  70          void OneWireWriteByte(unsigned char Byte)
+  71          {
+  72   1          unsigned char i;
+  73   1      
+  74   1          for(i=0;i<8;i++)
+  75   1          {
+  76   2              OneWireWriteBit(Byte & 0x01);
+  77   2              Byte >>= 1;
+  78   2          }
+  79   1      }
+  80          
+  81          /**
+  82            * @brief  读 1 字节数据（低位先读）
+  83            */
+  84          unsigned char OneWireReadByte(void)
+  85          {
+  86   1          unsigned char i, Byte = 0;
+  87   1      
+  88   1          for(i=0;i<8;i++)
+  89   1          {
+  90   2              if(OneWireReadBit()) Byte |= (0x01 << i);
+  91   2          }
+  92   1          return Byte;
+  93   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    117    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
